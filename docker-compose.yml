@@ -1,6 +1,7 @@
-version: '3.1'
+version: "3.9"
 
 services:
+  # https://hub.docker.com/_/mysql
   postgres-db:
     image: postgres
     environment:
@@ -11,11 +12,9 @@ services:
     ports:
       - 5432:5432
 
+  # https://hub.docker.com/_/mysql
   mysql-db:
     image: mysql
-    # NOTE: use of "mysql_native_password" is not recommended:
-    # https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
-    # (this is just an example, not intended to be a production configuration)
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
@@ -26,3 +25,15 @@ services:
       MYSQL_DATABASE: mysql
     ports:
       - 3306:3306
+  # https://hub.docker.com/_/microsoft-mssql-server
+  mssql-db:
+    container_name: mssql-db
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      # DB Login Info
+      # Username may be sa
+      # DB name may be msdb or tempdb
+      SA_PASSWORD: mssql_password
+      ACCEPT_EULA: Y
+    ports:
+      - 1433:1433

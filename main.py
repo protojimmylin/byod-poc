@@ -115,6 +115,8 @@ def main():
     engines = [
         create_engine("postgresql+psycopg2://postgres:postgres@localhost:5432/postgres"),
         create_engine("mysql+pymysql://mysql:mysql@localhost:3306/mysql"),
+        # create_engine("mssql+pyodbc://sa:mssql_password@localhost:1433/msdb?driver=ODBC+Driver+18+for+SQL+Server"),
+        # To be tested
     ]
     action_funcs = [
         init,
@@ -139,3 +141,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# TODO:
+# 1. Write the MSSQL part, too.
+# 2. Make the ORM functions asynchronous.
+# 3. Check the source code about `chat_message` table.
+# 4. Try to make those queries work without joining others tables.
