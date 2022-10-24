@@ -1,6 +1,9 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, create_engine
-from sqlalchemy.orm import Session, declarative_base, relationship
+import asyncio
 
+from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.future import select
+from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
 
 # The Models
 Base = declarative_base()
@@ -14,7 +17,7 @@ class Person(Base):
     emails = relationship("Email", back_populates="person", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f"Person(id={self.id}, name={self.name}, age={self.age}, emails={self.emails})"
+        return f"Person(id={self.id}, name={self.name}, age={self.age})"
 
 
 class Email(Base):
@@ -28,102 +31,117 @@ class Email(Base):
         return f"Email(id={self.id}, address={self.address})"
 
 
-# Some actions
-def init(engine):
-    """Create all tables.
-
-    It will check if the table exists first.
-    """
-    Base.metadata.create_all(engine, checkfirst=True)
-
-
-def create_users(engine):
-    with Session(engine) as session:
-        instances = [
-            Person(
-                name="Brian",
-                age=19,
-                emails=[],
-            ),
-            Person(
-                name="Mary",
-                age=24,
-                emails=[],
-            ),
-        ]
-        session.add_all(instances)
-        session.commit()
-
-
-def create_users_with_emails(engine):
-    with Session(engine) as session:
-        instances = [
-            Person(
-                name="jack",
-                age=22,
-                emails=[
-                    Email(address="jack@google.com"),
-                ],
-            ),
-            Person(
-                name="eric",
-                age=24,
-                emails=[
-                    Email(address="eric@google.com"),
-                    Email(address="eric@yahoo.com"),
-                ],
-            ),
-            Person(
-                name="lucy",
-                age=31,
-                emails=[Email(address="lucy@yahoo.com")],
-            ),
-        ]
-        session.add_all(instances)
-        session.commit()
-
-
-def read_all(engine):
-    with Session(engine) as session:
-        users = session.query(Person).all()
-        for user in users:
-            print("   ", user)
-        addresses = session.query(Email).all()
-        for address in addresses:
-            print("   ", address)
-        print("")
-
-
 def update_eric_age(engine):
     with Session(engine) as session:
-        session.query(Person).filter_by(name="eric").update({'age': Person.age + 1})
+        session.query(Person).filter_by(name="eric").update({"age": Person.age + 1})
         session.commit()
 
 
-def delete_all(engine):
-    with Session(engine) as session:
-        session.query(Email).delete()
-        session.query(Person).delete()
-        session.commit()
+async def init(engine):
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
 
 
-def main():
-    """Our Main
+async def create_users(engine):
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        async with session.begin():
+            instances = [
+                Person(
+                    name="jack",
+                    age=22,
+                    emails=[
+                        Email(address="jack@google.com"),
+                    ],
+                ),
+                Person(
+                    name="eric",
+                    age=24,
+                    emails=[
+                        Email(address="eric@google.com"),
+                        Email(address="eric@yahoo.com"),
+                    ],
+                ),
+                Person(
+                    name="lucy",
+                    age=31,
+                    emails=[Email(address="lucy@yahoo.com")],
+                ),
+            ]
+            session.add_all(instances)
+            await session.commit()
 
-    Call action functions with different database engines as parameters.
-    """
-    engines = [
-        create_engine(
-            "postgresql+psycopg2://"
-            "postgres:postgres@localhost:5432/postgres"),
-        create_engine(
-            "mysql+pymysql://"
-            "mysql:mysql@localhost:3306/mysql"),
-        create_engine(
-            "mssql+pyodbc://"
-            "sa:Pa55w0rd!@localhost:1433/msdb"
-            "?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"),
-    ]
+
+async def create_users_with_emails(engine):
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        async with session.begin():
+            instances = [
+                Person(
+                    name="jack",
+                    age=22,
+                    emails=[
+                        Email(address="jack@google.com"),
+                    ],
+                ),
+                Person(
+                    name="eric",
+                    age=24,
+                    emails=[
+                        Email(address="eric@google.com"),
+                        Email(address="eric@yahoo.com"),
+                    ],
+                ),
+                Person(
+                    name="lucy",
+                    age=31,
+                    emails=[Email(address="lucy@yahoo.com")],
+                ),
+            ]
+            session.add_all(instances)
+            await session.commit()
+
+
+async def read_all(engine):
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        async with session.begin():
+            statement = select(Person)
+            result = await session.execute(statement)
+            for person in result.scalars():
+                print("   ", person)
+            statement = select(Email)
+            result = await session.execute(statement)
+            for email in result.scalars():
+                print("   ", email)
+
+
+# async def update_eric_age(engine):
+#     with Session(engine) as session:
+#         session.query(Person).filter_by(name="eric").update({"age": Person.age + 1})
+#         session.commit()
+
+
+async def delete_all(engine):
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        async with session.begin():
+            statement = select(Person)
+            result = await session.execute(statement)
+            for person in result.scalars():
+                session.delete(person)
+            await session.commit()
+    async with async_session() as session:
+        async with session.begin():
+            statement = select(Email)
+            result = await session.execute(statement)
+            for email in result.scalars():
+                session.delete(email)
+            await session.commit()
+
+
+async def main():
+    engine = create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres")
     action_funcs = [
         init,
         read_all,
@@ -133,23 +151,13 @@ def main():
         read_all,
         create_users_with_emails,
         read_all,
-        update_eric_age,
-        read_all,
         delete_all,
         read_all,
     ]
-
-    for engine in engines:
-        for func in action_funcs:
-            print(f"`{func.__name__}`:")
-            func(engine=engine)
+    for func in action_funcs:
+        print(f"`{func.__name__}`:")
+        await func(engine=engine)
 
 
 if __name__ == "__main__":
-    main()
-
-# TODO:
-# 1. Write the MSSQL part, too.
-# 2. Make the ORM functions asynchronous.
-# 3. Check the source code about `chat_message` table.
-# 4. Try to make those queries work without joining others tables.
+    asyncio.run(main())

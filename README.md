@@ -98,3 +98,25 @@ A POC about bring-your-own-database.
 5. `3.` may be solved by adding `TrustServerCertificate=yes` parameter in the connection string.
 
 6. `4.` may be worked around by using the default `msdb` or `tempdb` database.
+
+## Async ORM
+1. Async ORM need async driver, or this error happens:
+   ```
+   sqlalchemy.exc.InvalidRequestError: The asyncio extension requires an async driver to be used. The loaded 'psycopg2' is not async
+   ```
+2. Some database like MSSQL may not have a asynchronous driver, we can still use something like `conn.run_sync(...)` though.
+3. SQLAlchemy's API is a little messy and some naming things are wierd.
+   (Core/ORM API and many legacy, different syntax that is not compatible with each others.)
+   (sessionmaker() return a session factory?)
+4. Calling a model's `__repr__` in a asynchronous block will fail if the `__repr__` includes a field defined with `Relation(...)`.
+5. Delete/Update syntax seems not same as the original synchronous ones.
+6. FastAPI's documentation seems good and we are going to use it with SQLAlchemy. Maybe I should use it more.
+
+
+# TODOs:
+1. Write the MSSQL part, too. (Done)
+2. Make the ORM functions asynchronous. (Doing)
+   (Ref: https://fastapi.tiangolo.com/advanced/async-sql-databases/, https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#synopsis-core)
+3. Check the source code about `chat_message` table.
+4. Try to make those queries work without joining others tables.
+5. Find out how to do a environment check during clients set up the database connection.
