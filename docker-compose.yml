@@ -3,6 +3,7 @@ version: "3.9"
 services:
   # https://hub.docker.com/_/mysql
   postgres-db:
+    container_name: postgres-db
     image: postgres
     environment:
       # DB Login Info
@@ -14,6 +15,7 @@ services:
 
   # https://hub.docker.com/_/mysql
   mysql-db:
+    container_name: mysql-db
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
@@ -31,9 +33,8 @@ services:
     image: mcr.microsoft.com/mssql/server
     environment:
       # DB Login Info
-      # Username may be sa
-      # DB name may be msdb or tempdb
-      SA_PASSWORD: mssql_password
+      # MSSQL requires complex password.
+      SA_PASSWORD: Pa55w0rd!  # Username: sa
       ACCEPT_EULA: Y
     ports:
       - 1433:1433

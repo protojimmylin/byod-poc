@@ -94,3 +94,7 @@ A POC about bring-your-own-database.
    ```
 
 4. It seems that MSSQL docker image doesn't provide a way to set up a initial DB. I might need to set it up with a script. ([ref](https://github.com/microsoft/mssql-docker/issues/2))
+
+5. `3.` may be solved by adding `TrustServerCertificate=yes` parameter in the connection string.
+
+6. `4.` may be worked around by using the default `msdb` or `tempdb` database.

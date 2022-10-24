@@ -113,10 +113,16 @@ def main():
     Call action functions with different database engines as parameters.
     """
     engines = [
-        create_engine("postgresql+psycopg2://postgres:postgres@localhost:5432/postgres"),
-        create_engine("mysql+pymysql://mysql:mysql@localhost:3306/mysql"),
-        # create_engine("mssql+pyodbc://sa:mssql_password@localhost:1433/msdb?driver=ODBC+Driver+18+for+SQL+Server"),
-        # To be tested
+        create_engine(
+            "postgresql+psycopg2://"
+            "postgres:postgres@localhost:5432/postgres"),
+        create_engine(
+            "mysql+pymysql://"
+            "mysql:mysql@localhost:3306/mysql"),
+        create_engine(
+            "mssql+pyodbc://"
+            "sa:Pa55w0rd!@localhost:1433/msdb"
+            "?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"),
     ]
     action_funcs = [
         init,
