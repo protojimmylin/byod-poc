@@ -93,7 +93,7 @@ A POC about bring-your-own-database.
    (Background on this error at: https://sqlalche.me/e/14/e3q8)
    ```
 
-4. It seems that MSSQL docker image doesn't provide a way to set up a initial DB. I might need to set it up with a script. ([ref](https://github.com/microsoft/mssql-docker/issues/2))
+4. It seems that MSSQL docker image doesn't provide a way to set up a initial DB. I might need to set it up with a script. ([Ref](https://github.com/microsoft/mssql-docker/issues/2))
 
 5. `3.` may be solved by adding `TrustServerCertificate=yes` parameter in the connection string.
 
