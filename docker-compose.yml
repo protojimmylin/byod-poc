@@ -33,7 +33,6 @@ services:
     image: mcr.microsoft.com/mssql/server
     environment:
       # DB Login Info
-      # MSSQL requires complex password.
       SA_PASSWORD: Pa55w0rd!  # Username: sa
       ACCEPT_EULA: Y
     ports:
