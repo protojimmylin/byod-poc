@@ -100,6 +100,7 @@ A POC about bring-your-own-database.
 6. `4.` may be worked around by using the default `msdb` or `tempdb` database.
 
 ## Async ORM
+
 1. Async ORM need async driver, or this error happens:
    ```
    sqlalchemy.exc.InvalidRequestError: The asyncio extension requires an async driver to be used. The loaded 'psycopg2' is not async
@@ -112,11 +113,25 @@ A POC about bring-your-own-database.
 5. Delete/Update syntax seems not same as the original synchronous ones.
 6. FastAPI's documentation seems good and we are going to use it with SQLAlchemy. Maybe I should use it more.
 
+## Environment check
+
+1. Postgres, MySQL, MSSQL all provide some kinds of version/schema information in there system tables.
+2. There are also some special function like `version()` or `pg_database_size()` in postgres to be "called" using SQL.
+3. Some of them even provide information about the OS the databases live in.
+4. The way to get these information differ a lot among these databases. We may need to write it case by case.
+5. SQLAlchemy also do some environment check things inside some of their function like `_get_server_version_info`.
+6. If there are a existing testcases about these environment checks we can use it first and then improve it later.
+7. Or we have to make sure what we want to know and check them one by one.
+8. It is hard to make our client's DB work properly by this way.
+9. Maybe we should still tell our clients BYOD is not 100% guranteed to work because they just own the DB, a part of our product.
+10. We can still provide this kind of envrionment check as a basic precheck & diagnosis about client DB.
+11. And when our backend goes wrong in the runtime because of our client's DB, we should still be ready to handle it in our backend's code.
 
 # TODOs:
+
 1. Write the MSSQL part, too. (Done)
-2. Make the ORM functions asynchronous. (Doing)
+2. Find out how to do a environment check during our clients set up the database connection. (Doing)
+3. Make the ORM functions asynchronous. (Done partially)
    (Ref: https://fastapi.tiangolo.com/advanced/async-sql-databases/, https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#synopsis-core)
-3. Check the source code about `chat_message` table.
-4. Try to make those queries work without joining others tables.
-5. Find out how to do a environment check during clients set up the database connection.
+4. Check the source code about `chat_message` table.
+5. Try to make those queries work without joining others tables.

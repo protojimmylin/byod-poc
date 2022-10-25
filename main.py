@@ -36,11 +36,13 @@ async def check_postgres_schema(session):
 
 
 async def check_db_info(session):
-    result = await session.execute(text(
-        "select oid, datname, datconnlimit, dattablespace, datcollate, datctype, datcollversion"
-        " from pg_catalog.pg_database"
-        " where datname = 'postgres'"
-    ))
+    result = await session.execute(
+        text(
+            "select oid, datname, datconnlimit, dattablespace, datcollate, datctype, datcollversion"
+            " from pg_catalog.pg_database"
+            " where datname = 'postgres'"
+        )
+    )
     prettyprint(result)
 
 
@@ -50,31 +52,28 @@ async def check_db_size(session):
 
 
 async def check_db_config(session):
-    result = await session.execute(text(
-        "select source, setting"
-        " from pg_catalog.pg_settings"
-        " where source != 'default'"
-    ))
+    result = await session.execute(text("select source, setting from pg_catalog.pg_settings where source != 'default'"))
     prettyprint(result)
 
 
 async def check_tables(session):
-    result = await session.execute(text(
-        "select * from pg_catalog.pg_tables"
-        " where schemaname = 'public'"
-    ))
+    result = await session.execute(text("select * from pg_catalog.pg_tables where schemaname = 'public'"))
     prettyprint(result)
 
 
-async def f(session):
-    result = await session.execute(text(
-        "select from pg_catalog.pg_tables"
-        " where schemaname = 'public'"
-    ))
+async def check_columns(session):
+    result = await session.execute(
+        text(
+            "select column_name, ordinal_position, column_default, is_nullable, data_type, character_maximum_length,"
+            " numeric_precision, is_updatable"
+            " from information_schema.columns"
+            " where table_name = 'person'"
+        )
+    )
     prettyprint(result)
 
 
-async def env_check(engine):
+async def postgres_env_check(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         async with session.begin():
@@ -84,6 +83,14 @@ async def env_check(engine):
             await check_db_size(session)
             await check_db_config(session)
             await check_tables(session)
+            await check_columns(session)
+
+
+async def env_check(engine):
+    if engine.name == "postgresql":
+        await postgres_env_check(engine)
+    else:
+        print("Performing other database environment check")
 
 
 async def init(engine):
@@ -134,7 +141,7 @@ async def delete(engine):
 async def main():
     engines = [
         create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres", echo=True),
-        # create_async_engine("mysql+asyncmy://mysql:mysql@localhost:3306/mysql", echo=True),
+        create_async_engine("mysql+asyncmy://mysql:mysql@localhost:3306/mysql", echo=True),
     ]
     action_funcs = [
         env_check,
@@ -154,6 +161,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-# 1. Env check things.
-# 2. https://docs.sqlalchemy.org/en/14/core/dml.html#sqlalchemy.sql.expression.Insert.values.
