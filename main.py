@@ -1,12 +1,8 @@
 import asyncio
 
-from sqlalchemy import (
-    Column, ForeignKey, Integer, String, delete, insert, select, update
-)
+from sqlalchemy import Column, ForeignKey, Integer, String, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import (
-    Session, declarative_base, relationship, sessionmaker
-)
+from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 # The Models
 Base = declarative_base()
@@ -34,12 +30,6 @@ class Email(Base):
         return f"Email(id={self.id}, address={self.address})"
 
 
-def update_eric_age(engine):
-    with Session(engine) as session:
-        session.query(Person).filter_by(name="eric").update({"age": Person.age + 1})
-        session.commit()
-
-
 async def init(engine):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all, checkfirst=True)
@@ -49,32 +39,18 @@ async def create_users(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         async with session.begin():
-            instances = [
-                Person(
-                    name="jack",
-                    age=22,
-                    emails=[
-                        Email(address="jack@google.com"),
-                    ],
-                ),
-                Person(
-                    name="eric",
-                    age=24,
-                    emails=[
-                        Email(address="eric@google.com"),
-                        Email(address="eric@yahoo.com"),
-                    ],
-                ),
-                Person(
-                    name="lucy",
-                    age=31,
-                    emails=[Email(address="lucy@yahoo.com")],
-                ),
-            ]
-            session.add_all(instances)
+            statement = insert(Person).values(
+                [
+                    {"name": "jack", "age": 22},
+                    {"name": "eric", "age": 24},
+                    {"name": "lucy", "age": 31},
+                ]
+            )
+            await session.execute(statement)
             await session.commit()
 
 
+# TODO: Find a API like what `create_users` looks like.
 async def create_users_with_emails(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
@@ -117,10 +93,11 @@ async def read_all(engine):
                 print("   ", email)
 
 
-# async def update_eric_age(engine):
-#     with Session(engine) as session:
-#         session.query(Person).filter_by(name="eric").update({"age": Person.age + 1})
-#         session.commit()
+async def update_eric_age(engine):
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        await session.execute(update(Person).where(Person.name == "eric").values({"age": Person.age + 1}))
+        await session.commit()
 
 
 async def delete_all(engine):
@@ -133,7 +110,10 @@ async def delete_all(engine):
 
 
 async def main():
-    engine = create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres")
+    engines = [
+        create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"),
+        create_async_engine("mysql+aiomysql://mysql:mysql@localhost:3306/mysql"),
+    ]
     action_funcs = [
         init,
         read_all,
@@ -143,16 +123,21 @@ async def main():
         read_all,
         create_users_with_emails,
         read_all,
+        update_eric_age,
+        read_all,
         delete_all,
         read_all,
     ]
-    for func in action_funcs:
-        print(f"`{func.__name__}`:")
-        await func(engine=engine)
+    for engine in engines:
+        for func in action_funcs:
+            print(f"`{func.__name__}`:")
+            await func(engine=engine)
+    print("Done")
+    # TODO: It raises a `RuntimeError('Event loop is closed')` here.
 
 
 if __name__ == "__main__":
     asyncio.run(main())
 
-# 1. https://docs.sqlalchemy.org/en/14/core/dml.html#sqlalchemy.sql.expression.Insert.values.
-# 2. Env check things.
+# 1. Env check things.
+# 2. https://docs.sqlalchemy.org/en/14/core/dml.html#sqlalchemy.sql.expression.Insert.values.

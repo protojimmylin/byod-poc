@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  # https://hub.docker.com/_/mysql
+  # https://hub.docker.com/_/postgres
   postgres-db:
     container_name: postgres-db
     image: postgres
