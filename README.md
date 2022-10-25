@@ -117,7 +117,7 @@ A POC about bring-your-own-database.
 
 1. Postgres, MySQL, MSSQL all provide some kinds of version/schema information in there system tables.
 2. There are also some special function like `version()` or `pg_database_size()` in postgres to be "called" using SQL.
-3. Some of them even provide information about the OS the databases live in.
+3. Some of them even provide information about the OS. (like `version()` in postgres)
 4. The way to get these information differ a lot among these databases. We may need to write it case by case.
 5. SQLAlchemy also do some environment check things inside some of their function like `_get_server_version_info`.
 6. If there are a existing testcases about these environment checks we can use it first and then improve it later.
