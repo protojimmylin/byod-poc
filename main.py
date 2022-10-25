@@ -1,9 +1,12 @@
 import asyncio
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import (
+    Column, ForeignKey, Integer, String, delete, insert, select, update
+)
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.future import select
-from sqlalchemy.orm import Session, declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import (
+    Session, declarative_base, relationship, sessionmaker
+)
 
 # The Models
 Base = declarative_base()
@@ -106,12 +109,10 @@ async def read_all(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         async with session.begin():
-            statement = select(Person)
-            result = await session.execute(statement)
+            result = await session.execute(select(Person))
             for person in result.scalars():
                 print("   ", person)
-            statement = select(Email)
-            result = await session.execute(statement)
+            result = await session.execute(select(Email))
             for email in result.scalars():
                 print("   ", email)
 
@@ -126,17 +127,8 @@ async def delete_all(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         async with session.begin():
-            statement = select(Person)
-            result = await session.execute(statement)
-            for person in result.scalars():
-                session.delete(person)
-            await session.commit()
-    async with async_session() as session:
-        async with session.begin():
-            statement = select(Email)
-            result = await session.execute(statement)
-            for email in result.scalars():
-                session.delete(email)
+            await session.execute(delete(Email))
+            await session.execute(delete(Person))
             await session.commit()
 
 
@@ -161,3 +153,6 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+# 1. https://docs.sqlalchemy.org/en/14/core/dml.html#sqlalchemy.sql.expression.Insert.values.
+# 2. Env check things.
