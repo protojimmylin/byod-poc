@@ -1,33 +1,20 @@
 import asyncio
+import sqlalchemy as sa
 
-from sqlalchemy import Column, ForeignKey, Integer, String, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-# The Models
 Base = declarative_base()
 
 
 class Person(Base):
     __tablename__ = "person"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(30))
-    age = Column(Integer)
-    emails = relationship("Email", back_populates="person", cascade="all, delete-orphan")
+    id = sa.Column(sa.Integer, primary_key=True)
+    name = sa.Column(sa.String(30))
+    age = sa.Column(sa.Integer)
 
     def __repr__(self):
         return f"Person(id={self.id}, name={self.name}, age={self.age})"
-
-
-class Email(Base):
-    __tablename__ = "email"
-    id = Column(Integer, primary_key=True)
-    address = Column(String(60), nullable=False)
-    person_id = Column(Integer, ForeignKey("person.id"), nullable=False)
-    person = relationship("Person", back_populates="emails")
-
-    def __repr__(self):
-        return f"Email(id={self.id}, address={self.address})"
 
 
 async def init(engine):
@@ -35,11 +22,11 @@ async def init(engine):
         await conn.run_sync(Base.metadata.create_all, checkfirst=True)
 
 
-async def create_users(engine):
+async def create(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         async with session.begin():
-            statement = insert(Person).values(
+            statement = sa.insert(Person).values(
                 [
                     {"name": "jack", "age": 22},
                     {"name": "eric", "age": 24},
@@ -50,90 +37,49 @@ async def create_users(engine):
             await session.commit()
 
 
-# TODO: Find a API like what `create_users` looks like.
-async def create_users_with_emails(engine):
+async def read_and_print(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         async with session.begin():
-            instances = [
-                Person(
-                    name="jack",
-                    age=22,
-                    emails=[
-                        Email(address="jack@google.com"),
-                    ],
-                ),
-                Person(
-                    name="eric",
-                    age=24,
-                    emails=[
-                        Email(address="eric@google.com"),
-                        Email(address="eric@yahoo.com"),
-                    ],
-                ),
-                Person(
-                    name="lucy",
-                    age=31,
-                    emails=[Email(address="lucy@yahoo.com")],
-                ),
-            ]
-            session.add_all(instances)
-            await session.commit()
-
-
-async def read_all(engine):
-    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
-    async with async_session() as session:
-        async with session.begin():
-            result = await session.execute(select(Person))
+            result = await session.execute(sa.select(Person))
+            print("    Result:")
             for person in result.scalars():
-                print("   ", person)
-            result = await session.execute(select(Email))
-            for email in result.scalars():
-                print("   ", email)
+                print("        " + str(person))
 
 
-async def update_eric_age(engine):
+async def update(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
-        await session.execute(update(Person).where(Person.name == "eric").values({"age": Person.age + 1}))
+        await session.execute(sa.update(Person).values({"age": Person.age + 1}))
         await session.commit()
 
 
-async def delete_all(engine):
+async def delete(engine):
     async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         async with session.begin():
-            await session.execute(delete(Email))
-            await session.execute(delete(Person))
+            await session.execute(sa.delete(Person))
             await session.commit()
 
 
 async def main():
     engines = [
-        create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"),
-        create_async_engine("mysql+aiomysql://mysql:mysql@localhost:3306/mysql"),
+        create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres", echo=True),
+        create_async_engine("mysql+asyncmy://mysql:mysql@localhost:3306/mysql", echo=True),
     ]
     action_funcs = [
         init,
-        read_all,
-        create_users,
-        read_all,
-        delete_all,
-        read_all,
-        create_users_with_emails,
-        read_all,
-        update_eric_age,
-        read_all,
-        delete_all,
-        read_all,
+        read_and_print,
+        create,
+        read_and_print,
+        update,
+        read_and_print,
+        delete,
+        read_and_print,
     ]
     for engine in engines:
         for func in action_funcs:
-            print(f"`{func.__name__}`:")
             await func(engine=engine)
-    print("Done")
-    # TODO: It raises a `RuntimeError('Event loop is closed')` here.
 
 
 if __name__ == "__main__":
