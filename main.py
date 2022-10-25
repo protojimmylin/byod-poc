@@ -1,8 +1,10 @@
 import asyncio
 import sqlalchemy as sa
+import pandas
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.sql import text
 
 Base = declarative_base()
 
@@ -15,6 +17,73 @@ class Person(Base):
 
     def __repr__(self):
         return f"Person(id={self.id}, name={self.name}, age={self.age})"
+
+
+def prettyprint(result):
+    dataframe = pandas.DataFrame(result.all(), columns=result.keys())
+    markdown = dataframe.to_markdown()
+    print("\n" + markdown + "\n")
+
+
+async def check_postgres_version(session):
+    result = await session.execute(text("select version()"))
+    prettyprint(result)
+
+
+async def check_postgres_schema(session):
+    result = await session.execute(text("select pg_catalog.current_schema()"))
+    prettyprint(result)
+
+
+async def check_db_info(session):
+    result = await session.execute(text(
+        "select oid, datname, datconnlimit, dattablespace, datcollate, datctype, datcollversion"
+        " from pg_catalog.pg_database"
+        " where datname = 'postgres'"
+    ))
+    prettyprint(result)
+
+
+async def check_db_size(session):
+    result = await session.execute(text("select pg_catalog.pg_size_pretty(pg_database_size(current_database()))"))
+    prettyprint(result)
+
+
+async def check_db_config(session):
+    result = await session.execute(text(
+        "select source, setting"
+        " from pg_catalog.pg_settings"
+        " where source != 'default'"
+    ))
+    prettyprint(result)
+
+
+async def check_tables(session):
+    result = await session.execute(text(
+        "select * from pg_catalog.pg_tables"
+        " where schemaname = 'public'"
+    ))
+    prettyprint(result)
+
+
+async def f(session):
+    result = await session.execute(text(
+        "select from pg_catalog.pg_tables"
+        " where schemaname = 'public'"
+    ))
+    prettyprint(result)
+
+
+async def env_check(engine):
+    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    async with async_session() as session:
+        async with session.begin():
+            await check_postgres_version(session)
+            await check_postgres_schema(session)
+            await check_db_info(session)
+            await check_db_size(session)
+            await check_db_config(session)
+            await check_tables(session)
 
 
 async def init(engine):
@@ -65,17 +134,18 @@ async def delete(engine):
 async def main():
     engines = [
         create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres", echo=True),
-        create_async_engine("mysql+asyncmy://mysql:mysql@localhost:3306/mysql", echo=True),
+        # create_async_engine("mysql+asyncmy://mysql:mysql@localhost:3306/mysql", echo=True),
     ]
     action_funcs = [
-        init,
-        read_and_print,
-        create,
-        read_and_print,
-        update,
-        read_and_print,
-        delete,
-        read_and_print,
+        env_check,
+        # init,
+        # read_and_print,
+        # create,
+        # read_and_print,
+        # update,
+        # read_and_print,
+        # delete,
+        # read_and_print,
     ]
     for engine in engines:
         for func in action_funcs:
