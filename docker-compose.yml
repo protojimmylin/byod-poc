@@ -1,38 +1,44 @@
 version: "3.9"
 
 services:
-  # https://hub.docker.com/_/postgres
-  postgres-db:
-    container_name: postgres-db
-    image: postgres
-    environment:
-      # DB Login Info
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    ports:
-      - 5432:5432
+  # https://hub.docker.com/r/flyway/flyway/
+  flyway:
+    container_name: flyway
+    image: flyway/flyway
+    command: -url=jdbc:mysql://mysql-db -schemas=myschema -user=root -password=P@ssw0rd -connectRetries=60 migrate
+    volumes:
+      - ./flyway/sql:/flyway/sql
+    depends_on:
+      - mysql-db
+  # # https://hub.docker.com/_/postgres
+  # postgres-db:
+  #   container_name: postgres-db
+  #   image: postgres
+  #   environment:
+  #     # DB Login Info
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: postgres
+  #   ports:
+  #     - 5432:5432
   # https://hub.docker.com/_/mysql
   mysql-db:
     container_name: mysql-db
     image: mysql
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     environment:
       # DB Login Info
-      MYSQL_ROOT_PASSWORD: mysql
-      MYSQL_USER: mysql
-      MYSQL_PASSWORD: mysql
-      MYSQL_DATABASE: mysql
+      MYSQL_ROOT_PASSWORD: "P@ssw0rd"
     ports:
       - 3306:3306
-  # https://hub.docker.com/_/microsoft-mssql-server
-  mssql-db:
-    container_name: mssql-db
-    image: mcr.microsoft.com/mssql/server
-    environment:
-      # DB Login Info
-      SA_PASSWORD: Pa55w0rd!  # Username: sa
-      ACCEPT_EULA: Y
-    ports:
-      - 1433:1433
+  # # https://hub.docker.com/_/microsoft-mssql-server
+  # mssql-db:
+  #   container_name: mssql-db
+  #   image: mcr.microsoft.com/mssql/server
+  #   environment:
+  #     # DB Login Info
+  #     SA_PASSWORD: Pa55w0rd!  # Username: sa
+  #     ACCEPT_EULA: Y
+  #   ports:
+  #     - 1433:1433

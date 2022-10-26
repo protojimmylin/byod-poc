@@ -127,6 +127,36 @@ A POC about bring-your-own-database.
 10. We can still provide this kind of envrionment check as a basic precheck & diagnosis about client DB.
 11. And when our backend goes wrong in the runtime because of our client's DB, we should still be ready to handle it in our backend's code.
 
+## Flyway
+
+1. We want to connect to a empty database. ([Ref](https://flywaydb.org/documentation/getstarted/how))
+2. Flyway uses Java, but the backend code work with Flyway can be other languages.
+1. Flyway works best with Java. You can write Jave code to do migration. like:
+
+   ```
+   package db.migration;
+
+   import org.flywaydb.core.api.migration.BaseJavaMigration;
+   import org.flywaydb.core.api.migration.Context;
+   import java.sql.PreparedStatement;
+
+   /**
+   * Example of a Java-based migration.
+   */
+   public class V1_2__Another_user extends BaseJavaMigration {
+       public void migrate(Context context) throws Exception {
+           try (PreparedStatement statement =
+                   context
+                       .getConnection()
+                       .prepareStatement("INSERT INTO test_user (name) VALUES ('Obelix')")) {
+               statement.execute();
+           }
+       }
+   }
+   ```
+
+1. But there are also other ways like
+
 # TODOs:
 
 1. Write the MSSQL part, too. (Done)
