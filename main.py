@@ -141,7 +141,7 @@ async def delete(engine):
 async def main():
     engines = [
         # create_async_engine("postgresql+asyncpg://postgres:postgres@localhost:5432/postgres", echo=True),
-        create_async_engine("mysql+asyncmy://mysql:mysql@localhost:3306/mysql", echo=True),
+        create_async_engine("mysql+asyncmy://root:P%40ssw0rd@localhost:3306/myschema", echo=True),
     ]
     action_funcs = [
         env_check,

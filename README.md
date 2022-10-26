@@ -130,8 +130,9 @@ A POC about bring-your-own-database.
 ## Flyway
 
 1. We want to connect to a empty database. ([Ref](https://flywaydb.org/documentation/getstarted/how))
-2. Flyway uses Java, but the backend code work with Flyway can be other languages.
-1. Flyway works best with Java. You can write Jave code to do migration. like:
+2. Flyway uses Java as deps, but the backend code work with Flyway can be any other languages and calling Flyway's API through its command line interface.
+3. Flyway itself provide a docker image too so we don't have to be worried about the Java deps part. We can just mount the migration files into Flyway's container and let it read it and connect to our client's DB to do the migrations.
+4. About the migration files, Flyway works best with Java. You can write Jave code to do migration. like:
 
    ```
    package db.migration;
@@ -155,7 +156,16 @@ A POC about bring-your-own-database.
    }
    ```
 
-1. But there are also other ways like
+5. But it provide SQL-based migration files, too. We can just write SQL file like:
+
+   ```
+   CREATE TABLE MyTable (
+      MyColumn VARCHAR(100) NOT NULL
+   );
+   ```
+   and mount it in Flyway's `/flyway/sql` and it will read it.
+
+6. We want to create a empty DB ourself from the beginning so everything is recorded by Flyway, which would be easy to maintain.
 
 # TODOs:
 
