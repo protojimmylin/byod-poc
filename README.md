@@ -164,7 +164,13 @@ A POC about bring-your-own-database.
    ```
    and mount it in Flyway's `/flyway/sql` and it will read it.
 
-5. We want to create a empty DB ourself from the beginning so everything is recorded by Flyway, which would be easy to maintain.
+5. We want to create a empty DB ourself from the beginning so everything is recorded by Flyway, which is not a must but would be much easier to maintain.
+
+6. We don't want our normal developers to be able to get the credentials about our client's databases. We don't want to use CI/CD things to do the migrations. We want to build a GUI interface and our clients should click a button themselves to trigger the migration.
+
+7. Then, we need to trigger migration by Python programaticallu, which makes Flyway not a very good choice.
+
+8. Maybe we can use SQLAlchemy or Django migration tools.
 
 # TODOs:
 
