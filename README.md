@@ -98,6 +98,7 @@ A POC about bring-your-own-database.
 5. `3.` may be solved by adding `TrustServerCertificate=yes` parameter in the connection string.
 
 6. `4.` may be worked around by using the default `msdb` or `tempdb` database.
+7. `pip install mysqlclient` goes wrong, too if you don't `sudo apt-get install default-libmysqlclient-dev` first.
 
 ## Async ORM
 
@@ -201,6 +202,12 @@ A POC about bring-your-own-database.
 5. And other command like `alembic history` to check the history of the DB version.
 6. Alembic provides many command-line APIs but we want to uses these functions with Python programmatically. 
 7. And this should be easy because it seems that Alembic has a series of simple internal APIs written in Python and all the commands are just function calls. [Ref](https://alembic.sqlalchemy.org/en/latest/api/commands.html)
+8. We can use `sa.Text`.
+
+# Dirvers
+1. Postgres: psycopg2/asyncpg
+2. MySQL: pymysql/asyncmy (mysqlclient has some problem with alembic)
+3. MSSQL: pyodbc/??? (Async driver not found)
 
 # TODOs:
 
