@@ -173,35 +173,6 @@ A POC about bring-your-own-database.
 
 8. Maybe we can use SQLAlchemy or Django migration tools.
 
-## Alembic
-
-1. [Alembic](https://github.com/sqlalchemy/alembic) is a database migrations tool written by the author of SQLAlchemy.
-2. Alembic uses a `.py` file to describe the migration and the table schema is written with `SQLAlchemy` like this:
-   ```
-   # 1975ea83b712_create_account_table.py
-   def upgrade():
-       op.create_table(
-           'account',
-           sa.Column('id', sa.Integer, primary_key=True),
-           sa.Column('name', sa.String(50), nullable=False),
-           sa.Column('description', sa.Unicode(200)),
-       )
-
-   def downgrade():
-       op.drop_table('account')
-   ```
-3. Every migration files have two functions - `upgrade` and `downgrade` and some other information written in Python.
-4. The migration file names start with some kind of UUID like a Git commit, and Alembic provides some commands to checkout to each version of the migrations. like:
-   ```
-   alembic upgrade head
-   alembic upgrade 1975ea83b712
-   alembic downgrade -1
-   alembic upgrade 1975ea83b712+2
-   ```
-5. And other command like `alembic history` to check the history of the DB version.
-6. Alembic provides many command-line APIs but we want to uses these functions with Python programmatically. 
-7. And this should be easy because it seems that Alembic has a series of simple internal APIs written in Python and all the commands are just function calls. [Ref](https://alembic.sqlalchemy.org/en/latest/api/commands.html)
-
 # TODOs:
 
 1. Write the MSSQL part, too. (Done)
