@@ -210,3 +210,4 @@ A POC about bring-your-own-database.
    (Ref: https://fastapi.tiangolo.com/advanced/async-sql-databases/, https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#synopsis-core)
 4. Check the source code about `chat_message` table.
 5. Try to make those queries work without joining others tables.
+6. Do research how to handle mysql varchar and the posrgres's text fields.
