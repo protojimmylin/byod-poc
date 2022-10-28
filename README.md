@@ -215,6 +215,6 @@ A POC about bring-your-own-database.
 2. Find out how to do a environment check during our clients set up the database connection. (Doing)
 3. Make the ORM functions asynchronous. (Done partially)
    (Ref: https://fastapi.tiangolo.com/advanced/async-sql-databases/, https://docs.sqlalchemy.org/en/14/orm/extensions/asyncio.html#synopsis-core)
-4. Check the source code about `chat_message` table.
-5. Try to make those queries work without joining others tables.
-6. Do research how to handle mysql varchar and the posrgres's text fields.
+4. Do research how to handle mysql varchar and the posrgres's text fields.
+5. Check the source code about `chat_message` table.
+6. Try to make those queries work without joining others tables.
