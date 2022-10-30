@@ -1,16 +1,23 @@
 import pathlib
 
+from dotenv import dotenv_values
 from alembic.config import Config
 from alembic import command
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent
-ALEMBIC_CONFIG = Config(BASE_DIR / "alembic.ini")
+ENV_VARS = dotenv_values(BASE_DIR / ".env")
 
 
-def upgrade(url, version):
-    ALEMBIC_CONFIG.set_main_option("sqlalchemy.url", url)
-    command.upgrade(ALEMBIC_CONFIG, version)
+def upgrade_to_head(url):
+    config = Config(BASE_DIR / "alembic.ini")
+    config.set_main_option("sqlalchemy.url", url)
+    command.upgrade(config, "head")
+
+
+def main():
+    upgrade_to_head(url=ENV_VARS["POSTGRES_URL"])
+    upgrade_to_head(url=ENV_VARS["MYSQL_URL"])
 
 
 if __name__ == "__main__":
-    upgrade("mysql+pymysql://root:Pa55w0rd!@localhost:3306/mysql", "head")
+    main()

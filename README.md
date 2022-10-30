@@ -202,7 +202,10 @@ A POC about bring-your-own-database.
 5. And other command like `alembic history` to check the history of the DB version.
 6. Alembic provides many command-line APIs but we want to uses these functions with Python programmatically. 
 7. And this should be easy because it seems that Alembic has a series of simple internal APIs written in Python and all the commands are just function calls. [Ref](https://alembic.sqlalchemy.org/en/latest/api/commands.html)
-8. We can use `sa.Text`.
+8. We can just use `sa.Text` for both MySQL and Postgres for a `text` data type field.
+10. But be notice that `sa.String` works for only Postgres for creating a `varchar` data type field. For MySQL we need to use `sa.String(n)` to create a `varchar(n)`. `sa.String` will lead to an error.
+11. Asynchronous drivers seem to have some problem to work with Alembic but it should be fine to just use a synchronous drivers for Alembic.
+
 
 # Dirvers
 1. Postgres: psycopg2/asyncpg
