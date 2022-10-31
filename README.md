@@ -225,7 +225,9 @@ Alembic can't handle a changes by accident. So I go back to do research about ot
 3. Django works well with Python but its tracking table does not contain things like checksum values.
 4. Except for Alembic and Django, not many famous migration tools provide Python API.
 5. Flyway acctually has a checksum, but its Java based schema seems complex. [Ref](https://flywaydb.org/documentation/tutorials/java)
-6. Liquibase seems good because it has JSON Schema and some kind of checksum mechanism.
+6. Liquibase seems good because it has JSON Schema and some kind of checksum mechanism, and it is often compared to Flyway. [Ref](https://www.liquibase.com/liquibase-vs-flyway)
+7. Liquibase cons: The mechanism of it is complex (like: [it has 3 ways to run liquibase](https://www.liquibase.com/blog/3-ways-to-run-liquibase) and many added concepts like `changeSet` and `changeLog` and the "not linear" version) and at [the article](https://www.liquibase.com/liquibase-vs-flyway) we can see it provide much more features and ways to use, so it may be harder to maintain.
+
 
 ## Dirvers
 
