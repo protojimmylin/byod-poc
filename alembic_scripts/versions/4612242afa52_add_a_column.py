@@ -22,3 +22,8 @@ def upgrade():
 
 def downgrade():
     op.drop_column("account", "last_transaction_date")
+
+
+# 1. different DBs same syntax
+# 2. Robust, not allow many engineer mistaktes liek changing the migration files
+# 3. Support Python SDK, interface
