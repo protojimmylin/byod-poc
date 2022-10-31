@@ -178,6 +178,7 @@ A POC about bring-your-own-database.
 
 1. [Alembic](https://github.com/sqlalchemy/alembic) is a database migrations tool written by the author of SQLAlchemy.
 2. Alembic uses a `.py` file to describe the migration and the table schema is written with `SQLAlchemy` like this:
+
    ```
    # 1975ea83b712_create_account_table.py
    def upgrade():
@@ -191,6 +192,7 @@ A POC about bring-your-own-database.
    def downgrade():
        op.drop_table('account')
    ```
+
 3. Every migration files have two functions - `upgrade` and `downgrade` and some other information written in Python.
 4. The migration file names start with some kind of UUID like a Git commit, and Alembic provides some commands to checkout to each version of the migrations. like:
    ```
@@ -200,14 +202,33 @@ A POC about bring-your-own-database.
    alembic upgrade 1975ea83b712+2
    ```
 5. And other command like `alembic history` to check the history of the DB version.
-6. Alembic provides many command-line APIs but we want to uses these functions with Python programmatically. 
+6. Alembic provides many command-line APIs but we want to uses these functions with Python programmatically.
 7. And this should be easy because it seems that Alembic has a series of simple internal APIs written in Python and all the commands are just function calls. [Ref](https://alembic.sqlalchemy.org/en/latest/api/commands.html)
 8. We can just use `sa.Text` for both MySQL and Postgres for a `text` data type field.
-10. But be notice that `sa.String` works for only Postgres for creating a `varchar` data type field. For MySQL we need to use `sa.String(n)` to create a `varchar(n)`. `sa.String` will lead to an error.
-11. Asynchronous drivers seem to have some problem to work with Alembic but it should be fine to just use a synchronous drivers for Alembic.
+9. But be notice that `sa.String` works for only Postgres for creating a `varchar` data type field. For MySQL we need to use `sa.String(n)` to create a `varchar(n)`. `sa.String` will lead to an error.
+10. Asynchronous drivers seem to have some problem to work with Alembic but it should be fine to just use a synchronous drivers for Alembic.
 
+## Migration tools
 
-# Dirvers
+| Tool Name | Schema Definitions      | Resists Changes By Accident (Checksum) | APIs         |
+| --------- | ----------------------- | -------------------------------------- | ------------ |
+| Liquibase | SQL / XML / JSON / YAML | True                                   | CLI / Java   |
+| Flyway    | SQL / Java              | True                                   | CLI / Java   |
+| Evolve    | SQL / .Net              | True                                   | CLI / .NET   |
+| Alembic   | Python                  | False                                  | CLI / Python |
+| Django    | Python                  | False                                  | CLI / Python |
+
+Alembic can't handle a changes by accident. So I go back to do research about other tools.
+
+1. I didn't find a migration tool that meets all of our requirements.
+2. At least not a famous one, not like [pyway](https://github.com/sergiosbx/pyway) or [pyliquibase](https://github.com/liquibase/pyliquibase).
+3. Django works well with Python but its tracking table does not contain things like checksum values.
+4. Except for Alembic and Django, not many famous migration tools provide Python API.
+5. Flyway acctually has a checksum, but its Java based schema seems complex. [Ref](https://flywaydb.org/documentation/tutorials/java)
+6. Liquibase seems good because it has JSON Schema and some kind of checksum mechanism.
+
+## Dirvers
+
 1. Postgres: psycopg2/asyncpg
 2. MySQL: pymysql/asyncmy (mysqlclient has some problem with alembic)
 3. MSSQL: pyodbc/??? (Async driver not found)

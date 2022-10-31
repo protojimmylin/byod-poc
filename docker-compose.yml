@@ -6,9 +6,9 @@ services:
     container_name: postgres-db
     image: postgres
     environment:
-      # postgresql://postgres:Passw0rd!@localhost:5432/postgres
+      # postgresql://postgres:Pa55w0rd!@localhost:5432/postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Passw0rd!
+      POSTGRES_PASSWORD: Pa55w0rd!
       POSTGRES_DB: postgres
     ports:
       - 5432:5432
