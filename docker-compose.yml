@@ -36,15 +36,10 @@ services:
   #     - 1433:1433
   # https://hub.docker.com/r/liquibase/liquibase
   liquibase:
-    # Image to be pulled from Docker Hub
+    container_name: liquibase
     image: liquibase/liquibase
-    # Name of the container
-    container_name: Liquibase_container
-    # Setting depends_on to PostgreSQL container to wait till the service is ready to accept connections
     depends_on:
       - postgres-db
-    # Volume to add the liquibase collection of scripts
     volumes:
       - ./myliquibase/changelog/:/liquibase/changelog/
-    # Command to run the liquibase update service
     command: --defaults-file=/liquibase/changelog/liquibase.docker.properties update

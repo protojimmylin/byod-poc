@@ -230,7 +230,9 @@ Alembic can't handle a changes by accident. So I go back to do research about ot
 
 ## Liquibase
 1. The docker image is hard to use/debug, because the documentation of it doesn't provide a docker-compose.yml quickstart. It took me some time to set it up.
-2. 
+2. Liquibase do have a checksum mechanism. It records every changes and their md5 value in a table called `databasechangelog` in the database it connects to.
+3. Liquibase doesn't have a tranditional table schema difinition like what SQLAlchemy and Django have. We can't use Python or other programming language to define the table schema. Instead, it uses XML, JSON, SQL to describe these schema things.
+4. liquibase introduces additional abstractions such as changeset, changes, author, id, and so on that are not available in other tools, which may incur a learning cost.
 
 ## Dirvers
 
