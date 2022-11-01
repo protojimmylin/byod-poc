@@ -228,6 +228,9 @@ Alembic can't handle a changes by accident. So I go back to do research about ot
 6. Liquibase seems good because it has JSON Schema and some kind of checksum mechanism, and it is often compared to Flyway. [Ref](https://www.liquibase.com/liquibase-vs-flyway)
 7. Liquibase cons: The mechanism of it is complex (like: [it has 3 ways to run liquibase](https://www.liquibase.com/blog/3-ways-to-run-liquibase) and many added concepts like `changeSet` and `changeLog` and the "not linear" version) and at [the article](https://www.liquibase.com/liquibase-vs-flyway) we can see it provide much more features and ways to use, so it may be harder to maintain.
 
+## Liquibase
+1. The docker image is hard to use/debug, because the documentation of it doesn't provide a docker-compose.yml quickstart. It took me some time to set it up.
+2. 
 
 ## Dirvers
 
